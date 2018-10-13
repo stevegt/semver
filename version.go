@@ -16,7 +16,7 @@ func (err *Err) Error() string {
 	return err.Msg
 }
 
-// Version holds the information to generate a semvar string
+// Version holds the information to generate a semver string
 type Version struct {
 	// Major version number (required, must be an integer as string)
 	Major string `json:"major"`
@@ -64,7 +64,7 @@ func Parse(src []byte) (*Version, error) {
 		}
 		v.Major = strconv.Itoa(i)
 	} else {
-		return nil, &Err{Msg: "Invalid version, expecting semvar string"}
+		return nil, &Err{Msg: "Invalid version, expecting semver string"}
 	}
 	if len(parts) > 1 {
 		i, err = strconv.Atoi(parts[1])
@@ -73,7 +73,7 @@ func Parse(src []byte) (*Version, error) {
 		}
 		v.Minor = strconv.Itoa(i)
 	} else {
-		return nil, &Err{Msg: "Invalid version, expecting semvar string"}
+		return nil, &Err{Msg: "Invalid version, expecting semver string"}
 	}
 	if len(parts) > 2 {
 		i, err = strconv.Atoi(parts[2])
