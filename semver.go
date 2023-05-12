@@ -1,4 +1,4 @@
-package version
+package semver
 
 import (
 	"bytes"
@@ -86,4 +86,56 @@ func Parse(src []byte) (*Version, error) {
 		v.Suffix = parts[3]
 	}
 	return v, nil
+}
+
+// Cmp takes two version structs and returns an integer value
+// indicating the relationship between the two versions.
+// 0: v1 == v2
+// 1: v1 > v2
+// -1: v1 < v2
+func Cmp(v1, v2 *Version) int {
+	if v1.Major > v2.Major {
+		return 1
+	}
+	if v1.Major < v2.Major {
+		return -1
+	}
+	if v1.Minor > v2.Minor {
+		return 1
+	}
+	if v1.Minor < v2.Minor {
+		return -1
+	}
+	if v1.Patch > v2.Patch {
+		return 1
+	}
+	if v1.Patch < v2.Patch {
+		return -1
+	}
+	if v1.Suffix > v2.Suffix {
+		return 1
+	}
+	if v1.Suffix < v2.Suffix {
+		return -1
+	}
+	return 0
+}
+
+// Upgrade takes two version structs and returns three bools
+// indicating the relationship between the two versions.
+// 1. major: true if v2 is a major upgrade from V1
+// 2. minor: true if v2 is a minor upgrade from V1
+// 3. patch: true if v2 is a patch upgrade from V1
+func Upgrade(v1, v2 *Version) (major, minor, patch bool) {
+	if v2.Major > v1.Major {
+		major = true
+		minor = true
+		patch = true
+	} else if v2.Minor > v1.Minor {
+		minor = true
+		patch = true
+	} else if v2.Patch > v1.Patch {
+		patch = true
+	}
+	return
 }

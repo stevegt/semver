@@ -3,3 +3,9 @@
 *.bak
 test/
 bin/
+
+.files
+.find
+.grok
+context.md
+
