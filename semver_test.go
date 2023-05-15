@@ -27,11 +27,22 @@ func TestVersion(t *testing.T) {
 		t.Errorf("expected %q, got %q", expected, result)
 	}
 
+	// try parsing some version variations
 	v, err = Parse([]byte("vA1.2.3"))
 	if err == nil {
 		t.Errorf("expected an error, returns %s", v.ToJSON())
 	}
 
+	expected = "v1.1.1"
+	v, err = Parse([]byte("1.1.1"))
+	if err != nil {
+		t.Errorf("%s", err)
+		t.FailNow()
+	}
+	result = v.String()
+	if expected != result {
+		t.Errorf("expected %q, got %q", expected, result)
+	}
 }
 
 func TestVersionCompare(t *testing.T) {
