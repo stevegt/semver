@@ -2,10 +2,12 @@ package semver
 
 import (
 	"testing"
+
+	. "github.com/stevegt/goadapt"
 )
 
 func TestVersion(t *testing.T) {
-	expected := "v1.1.1"
+	expected := "v1.2.3"
 	v, err := Parse([]byte(expected))
 	if err != nil {
 		t.Errorf("%s", err)
@@ -16,7 +18,7 @@ func TestVersion(t *testing.T) {
 		t.Errorf("expected %q, got %q", expected, result)
 	}
 
-	expected = "v1.1"
+	expected = "v1.2"
 	v, err = Parse([]byte(expected))
 	if err != nil {
 		t.Errorf("%s", err)
@@ -29,12 +31,10 @@ func TestVersion(t *testing.T) {
 
 	// try parsing some version variations
 	v, err = Parse([]byte("vA1.2.3"))
-	if err == nil {
-		t.Errorf("expected an error, returns %s", v.ToJSON())
-	}
+	Tassert(t, err == nil, "expected no error, got %s", err)
 
-	expected = "v1.1.1"
-	v, err = Parse([]byte("1.1.1"))
+	expected = "v1.2.3"
+	v, err = Parse([]byte("1.2.3"))
 	if err != nil {
 		t.Errorf("%s", err)
 		t.FailNow()
@@ -56,15 +56,34 @@ func TestVersionCompare(t *testing.T) {
 		t.Errorf("%s", err)
 		t.FailNow()
 	}
-	if Cmp(v1, v2) != -1 {
-		t.Errorf("expected -1, got %d", Cmp(v1, v2))
-	}
-	if Cmp(v2, v1) != 1 {
-		t.Errorf("expected 1, got %d", Cmp(v2, v1))
-	}
-	if Cmp(v1, v1) != 0 {
-		t.Errorf("expected 0, got %d", Cmp(v1, v1))
-	}
+	cmp, err := Cmp(v1, v2)
+	Tassert(t, err == nil, "Cmp error: %s", err)
+	Tassert(t, cmp == -1, "expected -1, got %d", cmp)
+	cmp, err = Cmp(v2, v1)
+	Tassert(t, err == nil, "Cmp error: %s", err)
+	Tassert(t, cmp == 1, "expected 1, got %d", cmp)
+	cmp, err = Cmp(v1, v1)
+	Tassert(t, err == nil, "Cmp error: %s", err)
+	Tassert(t, cmp == 0, "expected 0, got %d", cmp)
+
+	// try patch version with string
+	v3, err := Parse([]byte("v1.2.3-alpha"))
+	Tassert(t, err == nil, "Parse error: %s", err)
+	v4, err := Parse([]byte("v1.2.3-beta"))
+	Tassert(t, err == nil, "Parse error: %s", err)
+	cmp, err = Cmp(v3, v4)
+	Tassert(t, err == nil, "Cmp error: %s", err)
+	Tassert(t, cmp == -1, "expected -1, got %d", cmp)
+
+	// try suffix version as string
+	v5, err := Parse([]byte("v1.2.3.alpha"))
+	Tassert(t, err == nil, "Parse error: %s", err)
+	v6, err := Parse([]byte("v1.2.3.beta"))
+	Tassert(t, err == nil, "Parse error: %s", err)
+	cmp, err = Cmp(v5, v6)
+	Tassert(t, err == nil, "Cmp error: %s", err)
+	Tassert(t, cmp == -1, "expected -1, got %d", cmp)
+
 }
 
 func TestVersionUpgrade(t *testing.T) {
@@ -78,7 +97,8 @@ func TestVersionUpgrade(t *testing.T) {
 		t.Errorf("%s", err)
 		t.FailNow()
 	}
-	major, minor, patch := Upgrade(v1, v2)
+	major, minor, patch, suffix, err := Upgrade(v1, v2)
+	Tassert(t, err == nil, "Upgrade error: %s", err)
 	if major {
 		t.Errorf("expected false, got %t", major)
 	}
@@ -87,5 +107,8 @@ func TestVersionUpgrade(t *testing.T) {
 	}
 	if !patch {
 		t.Errorf("expected true, got %t", patch)
+	}
+	if !suffix {
+		t.Errorf("expected true, got %t", suffix)
 	}
 }
